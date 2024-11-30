@@ -1,0 +1,10 @@
+# Backup files
+*~
+*.bak
+
+# System files
+.DS_Store
+.directory
+
+# Temporary files
+*.tmp
