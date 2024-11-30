@@ -21,10 +21,12 @@ and setting up system integration.
 Options:
     -h, --help              Show this help message
     -v, --verbose           Enable verbose output
-    -f, --force            Force overwrite existing desktop entries
+    -f, --force            Force overwrite existing entries
     -c, --cleanup          Remove old/broken desktop entries
     -n, --name-only        Use simple names (remove version numbers)
     --verify               Test desktop entries after creation
+    --no-desktop           Don't create desktop shortcuts
+    --no-menu              Don't create AppImages menu category
 
 Arguments:
     DIRECTORY              Path to directory containing AppImages
@@ -124,6 +126,47 @@ extract_icon() {
     rm -rf "$temp_dir"
 }
 
+# Function to set up AppImages menu category
+setup_appimages_menu() {
+    if [ "$NO_MENU" = true ]; then
+        return
+    fi
+
+    # Create directory for menu entry
+    mkdir -p ~/.local/share/desktop-directories
+
+    # Create the AppImages directory entry if it doesn't exist
+    if [ ! -f ~/.local/share/desktop-directories/appimages.directory ]; then
+        cat > ~/.local/share/desktop-directories/appimages.directory << EOF
+[Desktop Entry]
+Type=Directory
+Name=AppImages
+Icon=application-x-appimage
+EOF
+    fi
+
+    # Create the menu structure
+    mkdir -p ~/.config/menus/applications-merged
+    cat > ~/.config/menus/applications-merged/appimages.menu << EOF
+<!DOCTYPE Menu PUBLIC "-//freedesktop//DTD Menu 1.0//EN"
+"http://www.freedesktop.org/standards/menu-spec/menu-1.0.dtd">
+<Menu>
+    <Name>Applications</Name>
+    <Menu>
+        <Name>AppImages</Name>
+        <Directory>appimages.directory</Directory>
+        <Include>
+            <Category>AppImage</Category>
+        </Include>
+    </Menu>
+</Menu>
+EOF
+
+    if [ "$VERBOSE" = true ]; then
+        log "INFO" "Created AppImages menu category"
+    fi
+}
+
 # Function to create desktop entry
 create_desktop_entry() {
     local appimage="$1"
@@ -160,7 +203,7 @@ GenericName=$clean_name
 Exec=$appimage
 Icon=$HOME/.local/share/icons/appimages/$icon_name
 Type=Application
-Categories=Utility;
+Categories=AppImage;
 Terminal=false
 EOF
 
@@ -169,6 +212,14 @@ EOF
     fi
 
     chmod +x "$desktop_file"
+
+    # Create desktop shortcut if enabled
+    if [ "$NO_DESKTOP" != true ]; then
+        cp "$desktop_file" ~/Desktop/
+        if [ "$VERBOSE" = true ]; then
+            log "INFO" "Created desktop shortcut for $clean_name"
+        fi
+    fi
 
     if [ "$VERBOSE" = true ]; then
         log "INFO" "Created desktop entry for $clean_name"
@@ -181,6 +232,8 @@ FORCE=false
 CLEANUP=false
 NAME_ONLY=false
 VERIFY=false
+NO_DESKTOP=false
+NO_MENU=false
 DIRECTORY="."
 
 while [[ $# -gt 0 ]]; do
@@ -209,6 +262,14 @@ while [[ $# -gt 0 ]]; do
             VERIFY=true
             shift
             ;;
+        --no-desktop)
+            NO_DESKTOP=true
+            shift
+            ;;
+        --no-menu)
+            NO_MENU=true
+            shift
+            ;;
         *)
             DIRECTORY="$1"
             shift
@@ -222,6 +283,9 @@ if [ "$CLEANUP" = true ]; then
     rm -f ~/.local/share/applications/appimagekit*
     rm -rf ~/.config/appimagekit
 fi
+
+# Setup AppImages menu category
+setup_appimages_menu
 
 if [ ! -d "$DIRECTORY" ]; then
     log "ERROR" "Directory $DIRECTORY does not exist"
