@@ -231,7 +231,6 @@ VERBOSE=false
 FORCE=false
 CLEANUP=false
 NAME_ONLY=false
-VERIFY=false
 NO_DESKTOP=false
 NO_MENU=false
 DIRECTORY="."
@@ -256,10 +255,6 @@ while [[ $# -gt 0 ]]; do
             ;;
         -n|--name-only)
             NAME_ONLY=true
-            shift
-            ;;
-        --verify)
-            VERIFY=true
             shift
             ;;
         --no-desktop)
@@ -301,9 +296,8 @@ for appimage in "$DIRECTORY"/*.AppImage; do
     fi
 done
 
-if [ "$VERIFY" = true ]; then
-    log "INFO" "Updating system database..."
-    kbuildsycoca5 --noincremental
-fi
+# Update KDE's system configuration cache
+log "INFO" "Updating system configuration cache..."
+kbuildsycoca5 --noincremental
 
 log "INFO" "Done! Desktop entries have been created in ~/.local/share/applications/"
