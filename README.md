@@ -16,12 +16,16 @@ A tool to automatically create desktop entries for AppImage files in KDE Plasma,
 - xprop (usually installed by default)
 
 ## Installation
-git clone https://github.com/yourusername/kde-appimage-helper.git
+```bash
+git clone https://github.com/glassontin/kde-appimage-helper.git
 cd kde-appimage-helper
 chmod +x scripts/appimage-desktop-creator.sh
+```
 
 ## Usage
+```bash
 ./scripts/appimage-desktop-creator.sh [OPTIONS] [DIRECTORY]
+
 Options:
 -h, --help              Show help message
 -v, --verbose           Enable verbose output
@@ -29,13 +33,19 @@ Options:
 -c, --cleanup          Remove old/broken entries
 -n, --name-only        Use simple names (remove version numbers)
 --verify               Test entries after creation
+```
 
 ## Example
-Process all AppImages in your Applications directory
+Process all AppImages in your Applications directory:
+```bash
 ./scripts/appimage-desktop-creator.sh --verbose --cleanup ~/Applications
+```
 
 ## Common Issues
-- If icons don't appear immediately in menus, run: kbuildsycoca5 --noincremental
+- If icons don't appear immediately in menus, run:
+```bash
+kbuildsycoca5 --noincremental
+```
 - For panel integration issues, ensure the Icons-Only Task Manager widget is being used
 
 ## Contributing
