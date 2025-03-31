@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Script version
-VERSION="1.0.0"
+VERSION="1.0.1"
 
 # Color definitions for output
 RED='\033[0;31m'
@@ -200,15 +200,15 @@ create_desktop_entry() {
 [Desktop Entry]
 Name=$clean_name
 GenericName=$clean_name
-Exec=$appimage
-Icon=$HOME/.local/share/icons/appimages/$icon_name
+Exec="$appimage"
+Icon="$HOME/.local/share/icons/appimages/$icon_name"
 Type=Application
 Categories=AppImage;
 Terminal=false
 EOF
 
     if [ -n "$window_class" ]; then
-        echo "StartupWMClass=$window_class" >> "$desktop_file"
+        echo "StartupWMClass=\"$window_class\"" >> "$desktop_file"
     fi
 
     chmod +x "$desktop_file"
